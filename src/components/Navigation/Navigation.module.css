@@ -1,0 +1,19 @@
+.nav {
+  display: flex;
+}
+
+.link {
+  padding: 10px 20px;
+
+  font-weight: 700;
+}
+
+.link.active {
+  color: var(--color-blue);
+}
+
+.link:hover,
+.link:focus {
+  opacity: 0.9;
+  background-color: var(--color-gray-background);
+}

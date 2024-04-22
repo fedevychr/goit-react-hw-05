@@ -48,9 +48,9 @@ const MovieDetailsPage = () => {
           <p className={css.overview}>{movieDetails.overview}</p>
           <h3 className={css.subtitle}>Genres</h3>
           <ul className={css.genres}>
-            {movieDetails.genres.map(({ id, name }) => (
-              <li className={css.genre} key={id}>
-                {name}
+            {movieDetails.genres.map((movieDetails) => (
+              <li className={css.genre} key={movieDetails.id}>
+                {movieDetails.name}
               </li>
             ))}
           </ul>
