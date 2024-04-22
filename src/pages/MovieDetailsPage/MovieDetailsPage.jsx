@@ -1,67 +1,77 @@
-import { useEffect, useState } from "react";
-import { Link, Route, Routes, useParams } from "react-router-dom";
+import { Suspense, useEffect, useRef, useState } from "react";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useParams,
+} from "react-router-dom";
+import { IoArrowBackSharp } from "react-icons/io5";
 import { getMovie } from "../../service/movies";
+import clsx from "clsx";
 
-import MovieCast from "../../components/MovieCast/MovieCast";
-import MovieReviews from "../../components/MovieReviews/MovieReviews";
+import Loader from "../../components/Loader/Loader";
+import Heading from "../../components/Heading/Heading";
+import MovieDetails from "../../components/MovieDetails/MovieDetails";
 
 import css from "./MovieDetailsPage.module.css";
-
-const defaultImg =
-  "https://dl-media.viber.com/10/share/2/long/vibes/icon/image/0x0/95e0/5688fdffb84ff8bed4240bcf3ec5ac81ce591d9fa9558a3a968c630eaba195e0.jpg";
+const buildLinkClass = ({ isActive }) => {
+  return clsx(css.link, isActive && css.active);
+};
 
 const MovieDetailsPage = () => {
   const { movieId } = useParams();
-  const [movieDetails, setMovieDetails] = useState(null);
+  const [movie, setMovie] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const location = useLocation();
+  const backLinkRef = useRef(location.state ?? "/");
 
   useEffect(() => {
-    async function fetchMovieDetails() {
+    const fetchMovie = async () => {
+      setError(null);
+      setIsLoading(true);
       try {
-        const data = await getMovie(movieId);
-        setMovieDetails(data);
-      } catch (error) {
-        console.log("error: ", error);
+        const { data } = await getMovie(movieId);
+        setMovie(data);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setIsLoading(false);
       }
-    }
-
-    fetchMovieDetails();
+    };
+    fetchMovie();
   }, [movieId]);
 
   return (
-    <div>
-      <h1>Movie details: {movieId}</h1>
-      {Array.isArray(movieDetails) && (
-        <div>
-          <img
-            className={css.img}
-            src={
-              movieDetails.poster_path
-                ? `https://image.tmdb.org/t/p/w500${movieDetails.poster_path}`
-                : defaultImg
-            }
-            alt={movieDetails.title}
-            width={250}
-          />
-          <h2 className={css.title}>{movieDetails.title}</h2>
-          <p className={css.score}>User Score: {movieDetails.vote_count}</p>
-          <h3 className={css.subtitle}>Overview</h3>
-          <p className={css.overview}>{movieDetails.overview}</p>
-          <h3 className={css.subtitle}>Genres</h3>
-          <ul className={css.genres}>
-            {movieDetails.genres.map((movieDetails) => (
-              <li className={css.genre} key={movieDetails.id}>
-                {movieDetails.name}
-              </li>
-            ))}
+    <div className={css.container}>
+      <Link className={css.backLink} to={backLinkRef.current}>
+        <IoArrowBackSharp />
+        Back
+      </Link>
+      {error && <Heading title={error} />}
+      {isLoading && <Loader />}
+      {movie && <MovieDetails movie={movie} />}
+      {!error && !isLoading && (
+        <>
+          <ul className={css.list}>
+            <li className={css.listItem}>
+              <NavLink className={buildLinkClass} to="cast">
+                Cast
+              </NavLink>
+            </li>
+            <li className={css.listItem}>
+              <NavLink className={buildLinkClass} to="reviews">
+                Reviews
+              </NavLink>
+            </li>
           </ul>
-        </div>
+          <Suspense fallback={<Loader />}>
+            <Outlet />
+          </Suspense>
+        </>
       )}
-      <Link to="cast">Cast</Link>
-      <Link to="reviews">Reviews</Link>
-      <Routes>
-        <Route path="cast" element={<MovieCast />}></Route>
-        <Route path="reviews" element={<MovieReviews />}></Route>
-      </Routes>
     </div>
   );
 };

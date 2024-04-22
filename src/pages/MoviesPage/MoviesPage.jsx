@@ -38,7 +38,7 @@ const MoviesPage = () => {
     setSearchParams({ query });
   };
   return (
-    <div>
+    <div className="container">
       <Form handleSearch={handleSearch} value={query} />
       {isLoading && <Loader />}
       {movies && !movies.length && <Heading title="No Movies" />}

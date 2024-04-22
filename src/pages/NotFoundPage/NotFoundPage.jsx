@@ -1,5 +1,7 @@
+import css from "./NotFoundPage.module.css";
+
 const NotFoundPage = () => {
-  return <div>NotFoundPage</div>;
+  return <div className={css.container}>NotFoundPage</div>;
 };
 
 export default NotFoundPage;
